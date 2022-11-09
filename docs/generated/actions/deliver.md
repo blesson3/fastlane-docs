@@ -195,6 +195,11 @@ Path to the metadata you want to use. The folder has to be structured like this
 
 If you run `deliver init` this will automatically be created for you.
 
+##### app_clip_default_experience_metadata_path
+Path to the App Clip metadata you want to use. The folder has to be structured like this
+
+![/img/actions/deliver_metadata.png](/img/actions/deliver_app_clip_metadata_from_folder.png)
+
 ##### force
 
 ```ruby-skip-tests
@@ -303,6 +308,16 @@ You can set the app age ratings using _deliver_. You'll have to create and store
 
 The keys/values on the top allow one of 3 strings: "NONE", "INFREQUENT_OR_MILD" or "FREQUENT_OR_INTENSE", and the items on the bottom allow false or true. More information in [#reference](#reference).
 
+##### app_clip_header_images_path
+
+A path to a folder containing subfolders for each language. Each language folder must contain
+only one image and these images must be exactly 1800x1200px. These images will be used for the
+[default App Clip experience](https://developer.apple.com/documentation/app_clips/configuring_the_launch_experience_of_your_app_clip/#3604096)
+for this particular release.
+
+See the [App Clip docs](#app-clips) for more info.
+
+![/img/actions/deliver_app_clip_header_images.png](/img/actions/deliver_app_clip_header_images.png)
 
 ## Metadata
 
@@ -389,6 +404,11 @@ The available options:
 - 'appletvos'
 - 'osx'
 
+##### app_clip_default_experience_subtitle
+
+The subtitle that shows up for the default App Clip experience.
+
+See the [App Clip docs](#app-clips) for more info.
 
 ### Non-Localized
 
@@ -417,6 +437,16 @@ The english name of the secondary first sub category you want to set
 
 ##### secondary_second_sub_category
 The english name of the secondary second sub category you want to set
+
+##### app_clip_default_experience_action
+
+The action button that shows up for the default App Clip experience. The valid options are listed below:
+
+- `OPEN`
+- `VIEW`
+- `PLAY`
+
+See the [App Clip docs](#app-clips) for more info.
 </details>
 
 # Submit Build
@@ -523,6 +553,24 @@ Key | Editable While Live | Directory | Filename | Deprecated Filename
   `demo_user` | Yes | `<metadata_path>/review_information` | `demo_user.txt` | `review_demo_user.txt`
   `demo_password` | Yes | `<metadata_path>/review_information` | `demo_password.txt` | `review_demo_password.txt`
   `notes` | Yes | `<metadata_path>/review_information` | `notes.txt` | `review_notes.txt`
+
+
+## Available App Clip Metadata Folder Options
+
+_deliver_ allows for metadata to be set through `.txt` files in the App Clip metadata folder. This folder can be set using `app_clip_default_experience_metadata_path`. Below are all allowed metadata options.
+
+### Non-Localized Metadata
+
+Key | Editable While Live | Directory | Filename
+----|--------|--------|--------
+  `app_clip_default_experience_action` | 'No' | `<app_clip_metadata_path>` | `app_clip_default_experience_action.txt`
+
+
+### Localized Metadata
+
+Key | Editable While Live | Directory | Filename
+----|--------|--------|--------
+  `app_clip_default_experience_subtitle` | 'No' | `<app_clip_metadata_path>/<lang>/` | `app_clip_default_experience_subtitle.txt`
 
 
 ## Reference
@@ -777,6 +825,36 @@ Change syntax highlighting to *Ruby*.
 ## Provider Short Name
 If you are on multiple App Store Connect teams, _deliver_ needs a provider short name to know where to upload your binary. _deliver_ will try to use the long name of the selected team to detect the provider short name. To override the detected value with an explicit one, use the `itc_provider` option.
 
+## App Clips
+
+You can optionally specify the default App Clip experience using the following options:
+- `app_clip_default_experience_action`
+- `app_clip_default_experience_subtitle`
+- `app_clip_header_images_path`
+
+The default App Store Connect behavior is to not carry-over the previous version's default App Clip
+experience metadata. This is a contradictory behavior because it automatically carries over all
+other version metadata when creating a new version.
+
+_deliver_ fixes this issue by default carrying over the previous version's default App Clip
+experience metadata even if the options above are not specified.
+
+Example usage in your `Deliverfile`:
+
+```ruby-skip-tests
+deliver(
+  app_clip_default_experience_action: "PLAY",
+  app_clip_default_experience_subtitle: {
+    "en-US": "this is a test from fastlane",
+    "es-MX": "está es una prueba de fastlane"
+  },
+  app_clip_header_images_path: "./fastlane/app-clip-header-images"
+)
+```
+
+Note that the **default** App Clip experience and the **advanced** App Clip experiences are
+different, [Apple explains this here](https://developer.apple.com/documentation/app_clips/configuring_the_launch_experience_of_your_app_clip/#3671988).
+
 <hr />
 
 
@@ -825,6 +903,8 @@ Key | Description | Default
   `use_live_version` | Force usage of live version rather than edit version | `false`
   `metadata_path` | Path to the folder containing the metadata files | 
   `screenshots_path` | Path to the folder containing the screenshots | 
+  `app_clip_header_images_path` | Path to the folder containing the app clip header images | 
+  `app_clip_default_experience_metadata_path` | Path to the folder containing the app clip default experience metadata | 
   `skip_binary_upload` | Skip uploading an ipa or pkg to App Store Connect | `false`
   `skip_screenshots` | Don't upload the screenshots | `false`
   `skip_metadata` | Don't upload the metadata (e.g. title, description). This will still upload screenshots | `false`
@@ -875,6 +955,8 @@ Key | Description | Default
   `languages` | Metadata: List of languages to activate | 
   `ignore_language_directory_validation` | Ignore errors when invalid languages are found in metadata and screenshot directories | `false`
   `precheck_include_in_app_purchases` | Should precheck check in-app purchases? | `true`
+  `app_clip_default_experience_subtitle` | The localized subtitle for the default app clip experience | 
+  `app_clip_default_experience_action` | Action for the default app clip experience (OPEN, VIEW, PLAY) | 
   `app` | The (spaceship) app ID of the app you want to use/modify | 
 
 <em id="parameters-legend-dynamic">* = default value is dependent on the user's system</em>
